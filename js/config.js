@@ -40,19 +40,19 @@ var config = {
 		defaultSymbol: 'calendar', // Fontawsome Symbol see http://fontawesome.io/cheatsheet/
         urls: [
 		{//Main
-			symbol: 'fa-home', 
+			symbol: 'home', 
 			url: secrets.cals.cal0,
 		},
 		{//School
-			symbol: 'fa-institution',
+			symbol: 'institution',
 			url: secrets.cals.cal1,
 		},
 		{//Work
-			symbol: 'fa-wrench',
+			symbol: 'wrench',
 			url: secrets.cals.cal2,
 		},
 		{//Exams
-			symbol: 'fa-exclamation-triangle',
+			symbol: 'exclamation-triangle',
 			url: secrets.cals.cal3,
 		},
 		// {
