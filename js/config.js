@@ -62,6 +62,6 @@ var config = {
 		]
     },
     news: {
-        feed: 'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml'
+        feed: 'http://rss.cnn.com/rss/cnn_tech.rss'
     }
 }
