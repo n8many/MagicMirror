@@ -1,5 +1,5 @@
 var config = {
-    lang: 'nl',
+    lang: 'en',
     time: {
         timeFormat: 12
     },
@@ -7,30 +7,31 @@ var config = {
         //change weather params here:
         //units: metric or imperial
         params: {
-            q: 'Baarn,Netherlands',
-            units: 'metric',
+            q: secrets.loc,
+            units: 'imperial', //#MURICAH
             // if you want a different lang for the weather that what is set above, change it here
-            lang: 'nl',
-            APPID: 'YOUR_FREE_OPENWEATHER_API_KEY'
+            lang: 'en',
+            APPID: secrets.appid
         }
     },
     compliments: {
-        interval: 30000,
+        interval: 50000,
         fadeInterval: 4000,
         morning: [
-            'Good morning, handsome!',
-            'Enjoy your day!',
-            'How was your sleep?'
+            'Good morning.',
+            'Get out of bed.'
         ],
         afternoon: [
-            'Hello, beauty!',
-            'You look sexy!',
-            'Looking good today!'
+            'Good afternoon.'
         ],
         evening: [
-            'Wow, you look hot!',
-            'You look nice!',
-            'Hi, sexy!'
+            'Good evening.',
+            'Be productive.'
+        ],
+        night: [
+            'Good night.',
+            'Go to bed.',
+            'Go the fuck to sleep!'
         ]
     },
     calendar: {
@@ -38,22 +39,22 @@ var config = {
 		displaySymbol: true,
 		defaultSymbol: 'calendar', // Fontawsome Symbol see http://fontawesome.io/cheatsheet/
         urls: [
-		{
-			symbol: 'calendar-plus-o', 
-			url: 'https://p01-calendarws.icloud.com/ca/subscribe/1/n6x7Farxpt7m9S8bHg1TGArSj7J6kanm_2KEoJPL5YIAk3y70FpRo4GyWwO-6QfHSY5mXtHcRGVxYZUf7U3HPDOTG5x0qYnno1Zr_VuKH2M'
+		{//Main
+			symbol: 'fa-home', 
+			url: secrets.cals.cal0,
 		},
-		{
-			symbol: 'soccer-ball-o',
-			url: 'https://www.google.com/calendar/ical/akvbisn5iha43idv0ktdalnor4%40group.calendar.google.com/public/basic.ics',
+		{//School
+			symbol: 'fa-institution',
+			url: secrets.cals.cal1,
 		},
-		// {
-			// symbol: 'mars',
-			// url: "https://server/url/to/his.ics",
-		// },
-		// {
-			// symbol: 'venus',
-			// url: "https://server/url/to/hers.ics",
-		// },
+		{//Work
+			symbol: 'fa-wrench',
+			url: secrets.cals.cal2,
+		},
+		{//Exams
+			symbol: 'fa-exclamation-triangle',
+			url: secrets.cals.cal3,
+		},
 		// {
 			// symbol: 'venus-mars',
 			// url: "https://server/url/to/theirs.ics",
