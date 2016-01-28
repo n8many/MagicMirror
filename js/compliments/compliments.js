@@ -4,9 +4,10 @@ var compliments = {
 	complimentList: {
 		'morning': config.compliments.morning,
 		'afternoon': config.compliments.afternoon,
-		'evening': config.compliments.evening
+		'evening': config.compliments.evening,
+        'night': config.compliments.night
 	},
-	updateInterval: config.compliments.interval || 30000,
+	updateInterval: config.compliments.interval || 50000,
 	fadeInterval: config.compliments.fadeInterval || 4000,
 	intervalId: null
 };
@@ -26,15 +27,18 @@ compliments.updateCompliment = function () {
 	// compliments array to make a copy by value. 
 	// This way the original array of compliments stays in tact.
 
-	if (hour >= 3 && hour < 12) {
+	if (hour >= 5 && hour < 11) {
 		// Morning compliments
 		_list = compliments.complimentList['morning'].slice();
-	} else if (hour >= 12 && hour < 17) {
+	} else if (hour >= 11 && hour < 17) {
 		// Afternoon compliments
 		_list = compliments.complimentList['afternoon'].slice();
-	} else if (hour >= 17 || hour < 3) {
+	} else if (hour >= 17 && hour < 23) {
 		// Evening compliments
 		_list = compliments.complimentList['evening'].slice();
+    } else if (hour >= 23 || hour < 5) {
+        // Night compliments
+        _list = compliments.complimentList['night'].slice();
 	} else {
 		// Edge case in case something weird happens
 		// This will select a compliment from all times of day
