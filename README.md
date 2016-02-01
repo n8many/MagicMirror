@@ -10,7 +10,7 @@ Runs as a php script on a web server with basically no external dependencies. *C
 
 ##Configuration
 
-Modify `js/config.js` to change some general variables (language, weather location, compliments, news feed RSS and to add your own ICS calendar)
+Modify `js/config.js` to change some general variables (language, weather location, compliments, news feed RSS and to add your own ICS calendars)
 
 Currently using a an untracked file 'js/secrets.js' to hold location variable (loc), app id (appid), and calendars (cals.cal# (0-3)).
 
@@ -37,7 +37,9 @@ Takes an array of news feeds (or a single string) from the config file and retri
 
 ###[Time](js/time)
 
-Updates the time on the screen on one second interval.
+Updates the time on the screen on one second interval. Can be changed to omit displaying seconds by adding the config option ```displaySeconds = false``` in [config.js](js/config.js). When the seconds are disabled the interval is set to 60 seconds on the full minute.
+
+With the option ```digitFade = true```, changing digits are faded. This looks best if the seconds are omitted.
 
 ###[Version](js/version)
 
@@ -48,13 +50,14 @@ Checks the git version and refreshes if a new version has been pulled.
 Takes the user's inserted location, language, unit type, and OpenWeatherMap API key and grabs the five day weather forecast from OpenWeatherMap. You need to set the API key in the config for this to work. (See *configuration*.)
 
 ##Future features
+
 ###MPD Module
 ###Pixel Integration
 ###More sass
 
-##Extensions
 
-###[MagicMirror-Extensions by PaViRo](https://github.com/paviro/MagicMirror-Extensions)
+##Modules
+###[MagicMirror-Modules by PaViRo](https://github.com/paviro/MagicMirror-Modules)
 
 **Current features:** FRITZ!Box Callmonitor <br>
 **Future features:** Faceregognition, personalized views, online banking through HBCI and multiple calenders based on faceregognition.
