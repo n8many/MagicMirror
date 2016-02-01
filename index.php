@@ -19,7 +19,7 @@
 	<div class="center-ver center-hor"><!-- <div class="dishwasher light">Vaatwasser is klaar!</div> --></div>
 	<div class="lower-third center-hor"><div class="compliment light"></div></div>
 	<div class="bottom center-hor"><div class="news medium"></div></div>
-    <div class="bottom left-hor"><div class="music"></div></div>
+    <!--<div class="bottom left-hor"><div class="music"></div></div>-->
 
 </div>
 
