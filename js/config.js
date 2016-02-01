@@ -7,11 +7,11 @@ var config = {
         //change weather params here:
         //units: metric or imperial
         params: {
-            q: secrets.loc,
+            q: secrets.weather.loc,
             units: 'imperial', //#MURICAH
             // if you want a different lang for the weather that what is set above, change it here
             lang: 'en',
-            APPID: secrets.appid
+            APPID: secrets.weather.appid
         }
     },
     compliments: {
@@ -41,19 +41,19 @@ var config = {
         urls: [
 		{//Main
 			symbol: 'home', 
-			url: secrets.cals.cal0,
+			url: secrets.calendar.cal0,
 		},
 		{//School
 			symbol: 'institution',
-			url: secrets.cals.cal1,
+			url: secrets.calendar.cal1,
 		},
 		{//Work
 			symbol: 'wrench',
-			url: secrets.cals.cal2,
+			url: secrets.calendar.cal2,
 		},
 		{//Exams
 			symbol: 'exclamation-triangle',
-			url: secrets.cals.cal3,
+			url: secrets.calendar.cal3,
 		},
 		// {
 			// symbol: 'venus-mars',
