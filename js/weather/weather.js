@@ -36,12 +36,12 @@ var weather = {
 }
 
 /**
- * Rounds a float to one decimal place
+ * Rounds a float to an int (Looks cleaner than one decimal place)
  * @param  {float} temperature The temperature to be rounded
  * @return {float}             The new floating point value
  */
 weather.roundValue = function (temperature) {
-	return parseFloat(temperature).toFixed(1);
+	return parseFloat(temperature).toFixed(0);
 }
 
 /**
@@ -138,8 +138,8 @@ weather.updateWeatherForecast = function () {
 
 				_forecastHtml += '<td style="opacity:' + _opacity + '" class="day">' + moment(_forecast.dt, 'X').format('ddd') + '</td>';
 				_forecastHtml2 += '<td style="opacity:' + _opacity + '" class="icon-small ' + this.iconTable[_forecast.weather[0].icon] + '"></td>';
-				_forecastHtml3 += '<td style="opacity:' + _opacity + '" class="temp-max">' + this.roundValue(_forecast.temp.max) + '</td>';
-				_forecastHtml4 += '<td style="opacity:' + _opacity + '" class="temp-min">' + this.roundValue(_forecast.temp.min) + '</td>';
+				_forecastHtml3 += '<td style="opacity:' + _opacity + '" class="temp-max">' + this.roundValue(_forecast.temp.max) + '&deg;' + '</td>';
+				_forecastHtml4 += '<td style="opacity:' + _opacity + '" class="temp-min">' + this.roundValue(_forecast.temp.min) + '&deg;' + '</td>';
 
 				_opacity -= 0.155;
 
