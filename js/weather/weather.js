@@ -87,8 +87,8 @@ weather.updateCurrentWeather = function () {
 			$(this.temperatureLocation).updateWithText(_newTempHtml, this.fadeInterval);
 
 			var _now = moment().format('HH:mm'),
-				_sunrise = moment(data.sys.sunrise*1000).format('hh:mm'),
-				_sunset = moment(data.sys.sunset*1000).format('hh:mm'),
+				_sunrise = moment(data.sys.sunrise*1000).format('hh:mm A'),
+				_sunset = moment(data.sys.sunset*1000).format('hh:mm A'),
                 _sunrise24 = moment(data.sys.sunrise*1000).format('HH:mm'),
 				_sunset24 = moment(data.sys.sunset*1000).format('HH:mm');
 
