@@ -53,8 +53,6 @@ Takes the user's inserted location, language, unit type, and OpenWeatherMap API 
 
 ###MPD Module
 ###Pixel Integration
-###More sass
-
 
 ##Modules
 ###[MagicMirror-Modules by PaViRo](https://github.com/paviro/MagicMirror-Modules)
