@@ -65,5 +65,9 @@ var config = {
     },
     news: {
         feed: 'http://rss.cnn.com/rss/cnn_tech.rss'
+    },
+    music: {
+        ip: secrets.music.ip,
+        port: secrets.music.port
     }
 }
