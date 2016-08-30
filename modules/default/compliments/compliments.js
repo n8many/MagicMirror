@@ -13,19 +13,19 @@ Module.register("compliments",{
 	defaults: {
 		compliments: {
 			morning: [
-				"Good morning, handsome!",
-				"Enjoy your day!",
-				"How was your sleep?"
+				"Good morning.",
+				"Get out of bed.",
+				"COCKADOODLE DOO."
 			],
 			afternoon: [
-				"Hello, beauty!",
-				"You look sexy!",
-				"Looking good today!"
+				"Good afternoon.",
+				"Be productive.",
+				"Go do something."
 			],
 			evening: [
-				"Wow, you look hot!",
-				"You look nice!",
-				"Hi, sexy!"
+				"Good night.",
+				"Go to bed.",
+				"Go to sleep."
 			]
 		},
 		updateInterval: 30000,
