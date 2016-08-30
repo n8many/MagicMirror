@@ -1,8 +1,4 @@
 /* global config, vendor, MM, Log, Module */
-/* jshint unused:false */
-/* jshint -W061 */
-
-
 /* Magic Mirror
  * Module and File loaders.
  *
@@ -14,16 +10,11 @@ var Loader = (function() {
 
 	/* Create helper valiables */
 
+	var loadedModuleFiles = [];
 	var loadedFiles = [];
 	var moduleObjects = [];
 
-	var totalFiles = 0;
-	var moduleLoadCount = 0;
-	var fileLoadCount = 0;
-
-
 	/* Private Methods */
-
 
 	/* loadModules()
 	 * Loops thru all modules and requests load for every module.
@@ -32,10 +23,27 @@ var Loader = (function() {
 
 		var moduleData = getModuleData();
 
-		for (var m in moduleData) {
-			var module = moduleData[m];
-			loadModule(module);
-		}
+		var loadNextModule = function() {
+			if (moduleData.length > 0) {
+				var nextModule = moduleData[0];
+				loadModule(nextModule, function() {
+					moduleData = moduleData.slice(1);
+					loadNextModule();
+				});
+			} else {
+				// All modules loaded. Load custom.css
+				// This is done after all the moduels so we can
+				// overwrite all the defined styls.
+
+				loadFile("css/custom.css", function() {
+					// custom.css loaded. Start all modules.
+					startModules();
+				});
+
+			}
+		};
+
+		loadNextModule();
 	};
 
 	/* startModules()
@@ -54,7 +62,7 @@ var Loader = (function() {
 	/* getAllModules()
 	 * Retrieve list of all modules.
 	 *
-	 * return array - module data as configured in config 
+	 * return array - module data as configured in config
 	 */
 	var getAllModules = function() {
 		return config.modules;
@@ -73,145 +81,118 @@ var Loader = (function() {
 			var moduleData = modules[m];
 			var module = moduleData.module;
 
+			var elements = module.split("/");
+			var moduleName = elements[elements.length - 1];
+			var moduleFolder =  config.paths.modules + "/" + module;
+
+			if (defaultModules.indexOf(moduleName) !== -1) {
+				moduleFolder =  config.paths.modules + "/default/" + module;
+			}
+
 			moduleFiles.push({
 				index: m,
-				identifier: 'module_' + m + '_' + module,
-				name: module,
-				path: config.paths.modules + '/' +  module,
-				file: module + '.js',
+				identifier: "module_" + m + "_" + module,
+				name: moduleName,
+				path: moduleFolder + "/" ,
+				file: moduleName + ".js",
 				position: moduleData.position,
-				config: moduleData.config
+				header: moduleData.header,
+				config: moduleData.config,
+				classes: (typeof moduleData.classes !== "undefined") ? moduleData.classes + " " + module : module
 			});
-
 
 		}
 
 		return moduleFiles;
 	};
 
-
 	/* loadModule(module)
 	 * Load modules via ajax request and create module objects.
 	 *
+	 * argument callback function - Function called when done.
 	 * argument module object - Information about the module we want to load.
 	 */
-	var loadModule = function(module) {
-		Log.log('Loading module: <' + module.name + '> from: ' + module.path + '/' + module.file);
+	var loadModule = function(module, callback) {
+		var url = module.path + "/" + module.file;
 
-		var url = module.path + '/' + module.file;
-		var moduleRequest = new XMLHttpRequest();
-		moduleRequest.open("GET", url, true);
-		moduleRequest.onreadystatechange = function() {
-		  if(this.readyState === 4) {
-			if(this.status === 200) {
-
-				// FIXME: 
-				// Create the module by evaluating the response.
-				// This might not be the best way.
-				var ModuleDefinition = eval(this.response);
-				var moduleObject = new ModuleDefinition();
-	
-				bootstrapModule(module, moduleObject);
-				moduleProcessed();
-			} else {
-				Log.error("Could not load module: " + module.name);
-				moduleProcessed();
-			}
-		  }
+		var afterLoad = function() {
+			var moduleObject = Module.create(module.name);
+			bootstrapModule(module, moduleObject, function() {
+				callback();
+			});
 		};
-		moduleRequest.send();
-	};	
+
+		if (loadedModuleFiles.indexOf(url) !== -1) {
+			afterLoad();
+		} else {
+			loadFile(url, function() {
+				loadedModuleFiles.push(url);
+				afterLoad();
+			});
+		}
+
+	};
 
 	/* bootstrapModule(module, mObj)
 	 * Bootstrap modules by setting the module data and loading the scripts & styles.
 	 *
 	 * argument module object - Information about the module we want to load.
 	 * argument mObj object - Modules instance.
+	 * argument callback function - Function called when done.
 	 */
-	var bootstrapModule = function(module, mObj) {
-		Log.info('Bootstrapping module: ' + module.name);
+	var bootstrapModule = function(module, mObj, callback) {
+		Log.info("Bootstrapping module: " + module.name);
 
 		mObj.setData(module);
 
-		mObj.loadScripts();
-		mObj.loadStyles();
+		mObj.loadScripts(function() {
+			Log.log("Scripts loaded for: " + module.name);
+			mObj.loadStyles(function() {
+				Log.log("Styles loaded for: " + module.name);
+				mObj.loadTranslations(function() {
+					Log.log("Translations loaded for: " + module.name);
+					moduleObjects.push(mObj);
+					callback();
+				});
+			});
+		});
 
-		moduleObjects.push(mObj);
 	};
 
 	/* loadFile(fileName)
 	 * Load a script or stylesheet by adding it to the dom.
 	 *
 	 * argument fileName string - Path of the file we want to load.
+	 * argument callback function - Function called when done.
 	 */
-	var loadFile = function(fileName) {
-		totalFiles++;
+	var loadFile = function(fileName, callback) {
 
 		var extension =  fileName.slice((Math.max(0, fileName.lastIndexOf(".")) || Infinity) + 1);
 
 		switch (extension.toLowerCase()) {
-			case "js":
-				Log.log('Load script: ' + fileName);
-
-				var script = document.createElement("script");
-				script.type = "text/javascript";
-				script.src = fileName;
-				script.onload = function() {
-					fileProcessed();
-				};
-
-				document.getElementsByTagName("body")[0].appendChild(script);
+		case "js":
+			Log.log("Load script: " + fileName);
+			var script = document.createElement("script");
+			script.type = "text/javascript";
+			script.src = fileName;
+			script.onload = function() {
+				if (typeof callback === "function") {callback();}
+			};
+			document.getElementsByTagName("body")[0].appendChild(script);
 			break;
-
-			case "css":
-				Log.log('Load stylesheet: ' + fileName);
-
-				var stylesheet = document.createElement("link");
-				stylesheet.rel = "stylesheet";
-				stylesheet.type = "text/css";
-				stylesheet.href = fileName;
-				stylesheet.onload = function() {
-					fileProcessed();
-				};
-
-				document.getElementsByTagName("head")[0].appendChild(stylesheet);
-			break;				
+		case "css":
+			Log.log("Load stylesheet: " + fileName);
+			var stylesheet = document.createElement("link");
+			stylesheet.rel = "stylesheet";
+			stylesheet.type = "text/css";
+			stylesheet.href = fileName;
+			stylesheet.onload = function() {
+				if (typeof callback === "function") {callback();}
+			};
+			document.getElementsByTagName("head")[0].appendChild(stylesheet);
+			break;
 		}
 
-	};
-
-	/* fileProcessed()
-	 * Increase the fileLoadCount and check if we are ready to start all modules.
-	 */
-	var fileProcessed = function() {
-		fileLoadCount++;
-		prepareForStart();
-	};
-
-	/* moduleProcessed()
-	 * Increase the moduleLoadCount and check if we are ready to start all modules.
-	 */
-	var moduleProcessed = function() {
-		moduleLoadCount++;
-		prepareForStart();
-	};
-
-	/* prepareForStart()
-	 * Check if all files and modules are loaded. If so, start all modules.
-	 */
-	var prepareForStart = function() {
-		if (moduleLoadCount !== getAllModules().length) {
-			Log.log("Waiting for all modules to be loaded.");
-			return;
-		}
-
-		if (fileLoadCount !== totalFiles) {
-			Log.log("Waiting for all files to be loaded.");
-			return;
-		}
-
-		Log.info('Ready to start!');
-		startModules();
 	};
 
 	/* Public Methods */
@@ -227,21 +208,24 @@ var Loader = (function() {
 		/* loadFile()
 		 * Load a file (script or stylesheet).
 		 * Prevent double loading and search for files in the vendor folder.
+		 *
+		 * argument fileName string - Path of the file we want to load.
+		 * argument module Module Object - the module that calls the loadFile function.
+		 * argument callback function - Function called when done.
 		 */
-		loadFile: function(fileName, module) {
+		loadFile: function(fileName, module, callback) {
 
-			if (fileName.indexOf(config.paths.modules + '/') === 0) {
-				// This is a module specific files.
-				// Load it and then return.
-				loadFile(fileName);
+			if (loadedFiles.indexOf(fileName.toLowerCase()) !== -1) {
+				Log.log("File already loaded: " + fileName);
+				callback();
 				return;
 			}
 
-			if (fileName.indexOf('/') !== -1) {
-				// This is an external file.
-				// External files will always be loaded.
+			if (fileName.indexOf("http://") === 0 || fileName.indexOf("https://") === 0 || fileName.indexOf("/") !== -1) {
+				// This is an absolute or relative path.
 				// Load it and then return.
-				loadFile(fileName);
+				loadedFiles.push(fileName.toLowerCase());
+				loadFile(fileName, callback);
 				return;
 			}
 
@@ -249,27 +233,15 @@ var Loader = (function() {
 				// This file is available in the vendor folder.
 				// Load it from this vendor folder.
 				loadedFiles.push(fileName.toLowerCase());
-				loadFile(config.paths.vendor+'/'+vendor[fileName]);
+				loadFile(config.paths.vendor + "/" + vendor[fileName], callback);
 				return;
 			}
 
-			if (loadedFiles.indexOf(fileName.toLowerCase()) === -1) {
-				// File not loaded yet.
-				// Load it based on the module path.
-				loadedFiles.push(fileName.toLowerCase());
-				loadFile(module.file(fileName));
-				return;
-			}
-
-			Log.log('File already loaded: ' + fileName);
+			// File not loaded yet.
+			// Load it based on the module path.
+			loadedFiles.push(fileName.toLowerCase());
+			loadFile(module.file(fileName), callback);
 		}
 	};
 
 })();
-
-
-
-
-
-
-
