@@ -23,10 +23,15 @@ Module.register("compliments",{
 				"Go do something."
 			],
 			evening: [
-				"Good night.",
+                "Good evening.",
+				"Go do something."			
+            ],
+            night: [
+                "Good night.",
 				"Go to bed.",
 				"Go to sleep."
-			]
+            ]
+
 		},
 		updateInterval: 30000,
 		fadeSpeed: 4000
@@ -87,11 +92,13 @@ Module.register("compliments",{
 
 		if (hour >= 3 && hour < 12) {
 			return this.config.compliments.morning;
-		} else if (hour >= 12 && hour < 17) {
+		} else if (hour >= 12 && hour < 18) {
 			return this.config.compliments.afternoon;
-		} else {
+		} else if (hour >= 18 && hour < 22) {
 			return this.config.compliments.evening;
-		}
+		} else {
+            return this.config.compliments.night;
+        }
 	},
 
 	/* complimentArray()
