@@ -224,7 +224,19 @@ Module.register("currentweather",{
 			return;
 		}
 
-		this.temperature = this.roundValue(data.main.temp);
+        if (data.main.temp > 200) {
+            if (config.units == "imperial") {
+            this.temperature
+                = this.roundValue((data.main.temp-273.15)*9/5 + 32);
+
+            } else {
+                this.temperature =this.roundValue(data.main.temp-273.15);
+
+            }
+        } else {
+		    this.temperature = this.roundValue(data.main.temp);
+        }
+
 
 		if (this.config.useBeaufort){
 			this.windSpeed = this.ms2Beaufort(this.roundValue(data.wind.speed));
