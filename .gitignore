@@ -62,6 +62,7 @@ Temporary Items
 /modules/**
 !/modules/default/**
 !/modules/README.md**
+Pixel.pmdl
 
 # Ignore changes to the custom css files.
 /css/custom.css
