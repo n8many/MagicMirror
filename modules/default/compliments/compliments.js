@@ -6,12 +6,14 @@
  * By Michael Teeuw http://michaelteeuw.nl
  * MIT Licensed.
  */
-
-Module.register("compliments",{
+Module.register("compliments", {
 
 	// Module config defaults.
 	defaults: {
 		compliments: {
+			anytime: [
+				"Hey there sexy!"
+			],
 			morning: [
 				"Good morning.",
 				"Get out of bed.",
@@ -99,7 +101,7 @@ Module.register("compliments",{
 	 */
 	complimentArray: function() {
 		var hour = moment().hour();
-		var compliments  = null;
+		var compliments = null;
 
 		if (hour >= 3 && hour < 12) {
 			compliments = this.config.compliments.morning;
@@ -111,9 +113,16 @@ Module.register("compliments",{
             compliments = this.config.compliments.night;
         }
 
-		if ( this.currentWeatherType in this.config.compliments) {
+		if (typeof compliments === "undefined") {
+			compliments = new Array();
+		}
+
+		if (this.currentWeatherType in this.config.compliments) {
 			compliments.push.apply(compliments, this.config.compliments[this.currentWeatherType]);
 		}
+
+		compliments.push.apply(compliments, this.config.compliments.anytime);
+
 		return compliments;
 
 	},
@@ -125,7 +134,7 @@ Module.register("compliments",{
 		var xobj = new XMLHttpRequest();
 		xobj.overrideMimeType("application/json");
 		xobj.open("GET", this.file(this.config.remoteFile), true);
-		xobj.onreadystatechange = function () {
+		xobj.onreadystatechange = function() {
 			if (xobj.readyState == 4 && xobj.status == "200") {
 				callback(xobj.responseText);
 			}
