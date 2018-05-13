@@ -11,9 +11,9 @@ Module.register("compliments", {
 	// Module config defaults.
 	defaults: {
 		compliments: {
-			anytime: [
-				"Hey there sexy!"
-			],
+//			anytime: [
+//			    "Oh, hello.",
+//			],
 			morning: [
 				"Good morning.",
 				"Get out of bed.",

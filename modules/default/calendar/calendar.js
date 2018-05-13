@@ -28,6 +28,7 @@ Module.register("calendar", {
 		fadePoint: 0.25, // Start on 1/4th of the list.
 		hidePrivate: false,
 		colored: false,
+		hometz: "Americas/New_York",
 		calendars: [
 			{
 				symbol: "calendar",
@@ -49,7 +50,7 @@ Module.register("calendar", {
 
 	// Define required scripts.
 	getScripts: function () {
-		return ["moment.js"];
+		return ["moment.js", "moment-timezone.js"];
 	},
 
 	// Define required translations.
@@ -66,6 +67,7 @@ Module.register("calendar", {
 
 		// Set locale.
 		moment.locale(config.language);
+		//moment.tz.load(packdata);
 
 		for (var c in this.config.calendars) {
 			var calendar = this.config.calendars[c];
@@ -141,6 +143,11 @@ Module.register("calendar", {
 			if (excluded) {
 				continue;
 			}
+
+			//var startBase = moment.tz(event.startDate, event.startDate.tz);
+			//event.startDate = startBase.clone().tz(this.config.hometz);
+			//var endBase = moment.tz(event.endDate, event.endDate.tz);
+			//event.endDate = endBase.clone().tz(this.config.hometz);
 
 			var eventWrapper = document.createElement("tr");
 
