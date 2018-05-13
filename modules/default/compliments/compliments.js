@@ -37,7 +37,13 @@ Module.register("compliments", {
 		},
 		updateInterval: 30000,
 		remoteFile: null,
-		fadeSpeed: 4000
+		fadeSpeed: 4000,
+		morningStartTime: 3,
+		morningEndTime: 12,
+		afternoonStartTime: 12,
+		afternoonEndTime: 17,
+        eveningStartTime: 17,
+        eveningEndTime: 22
 	},
 
 	// Set currentweather from module
@@ -54,14 +60,15 @@ Module.register("compliments", {
 
 		this.lastComplimentIndex = -1;
 
+		var self = this;
 		if (this.config.remoteFile != null) {
 			this.complimentFile((response) => {
 				this.config.compliments = JSON.parse(response);
+				self.updateDom();
 			});
 		}
 
 		// Schedule update timer.
-		var self = this;
 		setInterval(function() {
 			self.updateDom(self.config.fadeSpeed);
 		}, this.config.updateInterval);
@@ -103,14 +110,14 @@ Module.register("compliments", {
 		var hour = moment().hour();
 		var compliments = null;
 
-		if (hour >= 3 && hour < 12) {
-			compliments = this.config.compliments.morning;
-		} else if (hour >= 12 && hour < 18) {
-			compliments = this.config.compliments.afternoon;
-		} else if (hour >= 18 && hour < 22) {
-			compliments = this.config.compliments.evening;
-		} else {
-            compliments = this.config.compliments.night;
+		if (hour >= this.config.morningStartTime && hour < this.config.morningEndTime && this.config.compliments.hasOwnProperty("morning")) {
+			compliments = this.config.compliments.morning.slice(0);
+        }else if (hour >= this.config.afternoonStartTime && hour < this.config.afternoonEndTime && this.config.compliments.hasOwnProperty("afternoon")) {
+			compliments = this.config.compliments.afternoon.slice(0);
+        } else if (hour >= this.config.eveningStartTime && hour < this.config.eveningEndTime && this.config.compliments.hasOwnProperty("evening")) {
+			compliments = this.config.compliments.evening.slice(0);
+        } else if ( this.config.compliments.hasOwnProperty("night")) {
+            compliments = this.config.compliments.night.slice(0);
         }
 
 		if (typeof compliments === "undefined") {
@@ -124,7 +131,6 @@ Module.register("compliments", {
 		compliments.push.apply(compliments, this.config.compliments.anytime);
 
 		return compliments;
-
 	},
 
 	/* complimentFile(callback)
