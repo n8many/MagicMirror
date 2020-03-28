@@ -11,6 +11,12 @@ var Utils = require(__dirname + "/utils.js");
 var defaultModules = require(__dirname + "/../modules/default/defaultmodules.js");
 var path = require("path");
 
+// Alias modules mentioned in package.js under _moduleAliases.
+require("module-alias/register");
+
+// add timestamps in front of log messages
+require("console-stamp")(console, "HH:MM:ss.l");
+
 // Get version number.
 global.version = JSON.parse(fs.readFileSync("package.json", "utf8")).version;
 console.log("Starting MagicMirror: v" + global.version);
@@ -48,7 +54,6 @@ var App = function() {
 	 *
 	 * argument callback function - The callback function.
 	 */
-
 	var loadConfig = function(callback) {
 		console.log("Loading config ...");
 		var defaults = require(__dirname + "/defaults.js");
@@ -67,10 +72,10 @@ var App = function() {
 			var config = Object.assign(defaults, c);
 			callback(config);
 		} catch (e) {
-			if (e.code == "ENOENT") {
+			if (e.code === "ENOENT") {
 				console.error(Utils.colors.error("WARNING! Could not find config file. Please create one. Starting with default configuration."));
 			} else if (e instanceof ReferenceError || e instanceof SyntaxError) {
-				console.error(Utils.colors.error("WARNING! Could not validate config file. Please correct syntax errors. Starting with default configuration."));
+				console.error(Utils.colors.error("WARNING! Could not validate config file. Starting with default configuration. Please correct syntax errors at or above this line: " + e.stack));
 			} else {
 				console.error(Utils.colors.error("WARNING! Could not load config file. Starting with default configuration. Error found: " + e));
 			}
@@ -96,7 +101,7 @@ var App = function() {
 				". Check README and CHANGELOG for more up-to-date ways of getting the same functionality.")
 			);
 		}
-	}
+	};
 
 	/* loadModule(module)
 	 * Loads a specific module.
@@ -173,7 +178,7 @@ var App = function() {
 	};
 
 	/* cmpVersions(a,b)
-	 * Compare two symantic version numbers and return the difference.
+	 * Compare two semantic version numbers and return the difference.
 	 *
 	 * argument a string - Version number a.
 	 * argument a string - Version number b.
@@ -197,7 +202,7 @@ var App = function() {
 	/* start(callback)
 	 * This methods starts the core app.
 	 * It loads the config, then it loads all modules.
-	 * When it"s done it executs the callback with the config as argument.
+	 * When it's done it executes the callback with the config as argument.
 	 *
 	 * argument callback function - The callback function.
 	 */
@@ -231,7 +236,6 @@ var App = function() {
 					if (typeof callback === "function") {
 						callback(config);
 					}
-
 				});
 			});
 		});
@@ -259,6 +263,15 @@ var App = function() {
 	 */
 	process.on("SIGINT", () => {
 		console.log("[SIGINT] Received. Shutting down server...");
+		setTimeout(() => { process.exit(0); }, 3000);  // Force quit after 3 seconds
+		this.stop();
+		process.exit(0);
+	});
+
+	/* We also need to listen to SIGTERM signals so we stop everything when we are asked to stop by the OS.
+	 */
+	process.on("SIGTERM", () => {
+		console.log("[SIGTERM] Received. Shutting down server...");
 		setTimeout(() => { process.exit(0); }, 3000);  // Force quit after 3 seconds
 		this.stop();
 		process.exit(0);

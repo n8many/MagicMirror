@@ -21,7 +21,7 @@ var MM = (function() {
 	var createDomObjects = function() {
 		var domCreationPromises = [];
 
-		modules.forEach(module => {
+		modules.forEach(function(module) {
 			if (typeof module.data.position !== "string") {
 				return;
 			}
@@ -39,11 +39,13 @@ var MM = (function() {
 			dom.opacity = 0;
 			wrapper.appendChild(dom);
 
-			if (typeof module.data.header !== "undefined" && module.data.header !== "") {
-				var moduleHeader = document.createElement("header");
-				moduleHeader.innerHTML = module.data.header;
-				moduleHeader.className = "module-header";
-				dom.appendChild(moduleHeader);
+			var moduleHeader = document.createElement("header");
+			moduleHeader.innerHTML = module.getHeader();
+			moduleHeader.className = "module-header";
+			dom.appendChild(moduleHeader);
+
+			if (typeof module.getHeader() === "undefined" || module.getHeader() !== "") {
+				moduleHeader.style = "display: none;";
 			}
 
 			var moduleContent = document.createElement("div");
@@ -52,14 +54,14 @@ var MM = (function() {
 
 			var domCreationPromise = updateDom(module, 0);
 			domCreationPromises.push(domCreationPromise);
-			domCreationPromise.then(() => {
+			domCreationPromise.then(function() {
 				sendNotification("MODULE_DOM_CREATED", null, null, module);
 			}).catch(Log.error);
 		});
 
 		updateWrapperStates();
 
-		Promise.all(domCreationPromises).then(() => {
+		Promise.all(domCreationPromises).then(function() {
 			sendNotification("DOM_OBJECTS_CREATED");
 		});
 	};
@@ -106,7 +108,7 @@ var MM = (function() {
 	 * return Promise - Resolved when the dom is fully updated.
 	 */
 	var updateDom = function(module, speed) {
-		return new Promise((resolve) => {
+		return new Promise(function(resolve) {
 			var newContentPromise = module.getDom();
 			var newHeader = module.getHeader();
 
@@ -115,7 +117,7 @@ var MM = (function() {
 				newContentPromise = Promise.resolve(newContentPromise);
 			}
 
-			newContentPromise.then((newContent) => {
+			newContentPromise.then(function(newContent) {
 				var updatePromise = updateDomWithContent(module, speed, newHeader, newContent);
 
 				updatePromise.then(resolve).catch(Log.error);
@@ -134,7 +136,7 @@ var MM = (function() {
 	 * return Promise - Resolved when the module dom has been updated.
 	 */
 	var updateDomWithContent = function(module, speed, newHeader, newContent) {
-		return new Promise((resolve) => {
+		return new Promise(function(resolve) {
 			if (module.hidden || !speed) {
 				updateModuleContent(module, newHeader, newContent);
 				resolve();
@@ -173,6 +175,10 @@ var MM = (function() {
 	 */
 	var moduleNeedsUpdate = function(module, newHeader, newContent) {
 		var moduleWrapper = document.getElementById(module.identifier);
+		if (moduleWrapper === null) {
+			return false;
+		}
+
 		var contentWrapper = moduleWrapper.getElementsByClassName("module-content");
 		var headerWrapper = moduleWrapper.getElementsByClassName("module-header");
 
@@ -199,15 +205,15 @@ var MM = (function() {
 	 */
 	var updateModuleContent = function(module, newHeader, newContent) {
 		var moduleWrapper = document.getElementById(module.identifier);
+		if (moduleWrapper === null) {return;}
 		var headerWrapper = moduleWrapper.getElementsByClassName("module-header");
 		var contentWrapper = moduleWrapper.getElementsByClassName("module-content");
 
 		contentWrapper[0].innerHTML = "";
 		contentWrapper[0].appendChild(newContent);
 
-		if( headerWrapper.length > 0 && newHeader) {
-			headerWrapper[0].innerHTML = newHeader;
-		}
+		headerWrapper[0].innerHTML = newHeader;
+		headerWrapper[0].style = headerWrapper.length > 0 && newHeader ? undefined : "display: none;";
 	};
 
 	/* hideModule(module, speed, callback)
@@ -245,6 +251,9 @@ var MM = (function() {
 
 				if (typeof callback === "function") { callback(); }
 			}, speed);
+		} else {
+			// invoke callback even if no content, issue 1308
+			if (typeof callback === "function") { callback(); }
 		}
 	};
 
@@ -284,7 +293,7 @@ var MM = (function() {
 		var moduleWrapper = document.getElementById(module.identifier);
 		if (moduleWrapper !== null) {
 			moduleWrapper.style.transition = "opacity " + speed / 1000 + "s";
-			// Restore the postition. See hideModule() for more info.
+			// Restore the position. See hideModule() for more info.
 			moduleWrapper.style.position = "static";
 
 			updateWrapperStates();
@@ -304,7 +313,7 @@ var MM = (function() {
 	/* updateWrapperStates()
 	 * Checks for all positions if it has visible content.
 	 * If not, if will hide the position to prevent unwanted margins.
-	 * This method schould be called by the show and hide methods.
+	 * This method should be called by the show and hide methods.
 	 *
 	 * Example:
 	 * If the top_bar only contains the update notification. And no update is available,
@@ -312,7 +321,6 @@ var MM = (function() {
 	 * an ugly top margin. By using this function, the top bar will be hidden if the
 	 * update notification is not visible.
 	 */
-
 	var updateWrapperStates = function() {
 		var positions = ["top_bar", "top_left", "top_center", "top_right", "upper_third", "middle_center", "lower_third", "bottom_left", "bottom_center", "bottom_right", "bottom_bar", "fullscreen_above", "fullscreen_below"];
 
@@ -322,7 +330,7 @@ var MM = (function() {
 
 			var showWrapper = false;
 			Array.prototype.forEach.call(moduleWrappers, function(moduleWrapper) {
-				if (moduleWrapper.style.position == "" || moduleWrapper.style.position == "static") {
+				if (moduleWrapper.style.position === "" || moduleWrapper.style.position === "static") {
 					showWrapper = true;
 				}
 			});
@@ -471,7 +479,7 @@ var MM = (function() {
 		/* sendNotification(notification, payload, sender)
 		 * Send a notification to all modules.
 		 *
-		 * argument notification string - The identifier of the noitication.
+		 * argument notification string - The identifier of the notification.
 		 * argument payload mixed - The payload of the notification.
 		 * argument sender Module - The module that sent the notification.
 		 */
@@ -551,7 +559,7 @@ var MM = (function() {
 })();
 
 // Add polyfill for Object.assign.
-if (typeof Object.assign != "function") {
+if (typeof Object.assign !== "function") {
 	(function() {
 		Object.assign = function(target) {
 			"use strict";

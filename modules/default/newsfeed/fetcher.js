@@ -14,9 +14,10 @@ var iconv = require("iconv-lite");
  *
  * attribute url string - URL of the news feed.
  * attribute reloadInterval number - Reload interval in milliseconds.
+ * attribute logFeedWarnings boolean - Log warnings when there is an error parsing a news article.
  */
 
-var Fetcher = function(url, reloadInterval, encoding) {
+var Fetcher = function(url, reloadInterval, encoding, logFeedWarnings) {
 	var self = this;
 	if (reloadInterval < 1000) {
 		reloadInterval = 1000;
@@ -60,7 +61,7 @@ var Fetcher = function(url, reloadInterval, encoding) {
 					url: url,
 				});
 
-			} else {
+			} else if (logFeedWarnings) {
 				console.log("Can't parse feed item:");
 				console.log(item);
 				console.log("Title: " + title);
@@ -80,11 +81,10 @@ var Fetcher = function(url, reloadInterval, encoding) {
 			scheduleTimer();
 		});
 
-
 		nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
 		headers =	{"User-Agent": "Mozilla/5.0 (Node.js "+ nodeVersion + ") MagicMirror/"	+ global.version +	" (https://github.com/MichMich/MagicMirror/)",
 			"Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
-			"Pragma": "no-cache"}
+			"Pragma": "no-cache"};
 
 		request({uri: url, encoding: null, headers: headers})
 			.on("error", function(error) {
