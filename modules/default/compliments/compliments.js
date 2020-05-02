@@ -25,7 +25,6 @@ Module.register("compliments", {
 				"Go do something."
 			],
 			evening: [
-<<<<<<< HEAD
                 "Good evening.",
 				"Go do something."			
             ],
