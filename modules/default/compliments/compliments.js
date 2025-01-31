@@ -1,41 +1,19 @@
-/* global Log, Module, moment */
-
 /* Magic Mirror
  * Module: Compliments
  *
- * By Michael Teeuw http://michaelteeuw.nl
+ * By Michael Teeuw https://michaelteeuw.nl
  * MIT Licensed.
  */
 Module.register("compliments", {
-
 	// Module config defaults.
 	defaults: {
 		compliments: {
-//			anytime: [
-//			    "Oh, hello.",
-//			],
-			morning: [
-				"Good morning.",
-				"Get out of bed.",
-				"COCKADOODLE DOO."
-			],
-			afternoon: [
-				"Good afternoon.",
-				"Be productive.",
-				"Go do something."
-			],
-			evening: [
-                "Good evening.",
-				"Go do something."			
-            ],
-            night: [
-                "Good night.",
-				"Go to bed.",
-				"Go to sleep."
-            ],
-			"....-01-01": [
-				"Happy new year!"
-			]
+			//			anytime: ["Oh, hello."],
+			morning: ["Good morning.", "Get out of bed.", "COCKADOODLE DOO."],
+			afternoon: ["Good afternoon.", "Be productive.", "Go do something."],
+			evening: ["Good evening.", "Go do something."],
+			night: ["Good night.", "Go to bed.", "Go to sleep."],
+			"....-01-01": ["Happy new year!"]
 		},
 		updateInterval: 30000,
 		remoteFile: null,
@@ -44,36 +22,36 @@ Module.register("compliments", {
 		morningEndTime: 12,
 		afternoonStartTime: 12,
 		afternoonEndTime: 17,
-        eveningStartTime: 17,
-        eveningEndTime: 22,
+		eveningStartTime: 17,
+		eveningEndTime: 22,
 		random: true,
 		mockDate: null
 	},
-	lastIndexUsed:-1,
+	lastIndexUsed: -1,
 	// Set currentweather from module
 	currentWeatherType: "",
 
 	// Define required scripts.
-	getScripts: function() {
+	getScripts: function () {
 		return ["moment.js"];
 	},
 
 	// Define start sequence.
-	start: function() {
+	start: function () {
 		Log.info("Starting module: " + this.name);
 
 		this.lastComplimentIndex = -1;
 
 		var self = this;
 		if (this.config.remoteFile !== null) {
-			this.complimentFile(function(response) {
+			this.complimentFile(function (response) {
 				self.config.compliments = JSON.parse(response);
 				self.updateDom();
 			});
 		}
 
 		// Schedule update timer.
-		setInterval(function() {
+		setInterval(function () {
 			self.updateDom(self.config.fadeSpeed);
 		}, this.config.updateInterval);
 	},
@@ -85,12 +63,12 @@ Module.register("compliments", {
 	 *
 	 * return Number - Random index.
 	 */
-	randomIndex: function(compliments) {
+	randomIndex: function (compliments) {
 		if (compliments.length === 1) {
 			return 0;
 		}
 
-		var generate = function() {
+		var generate = function () {
 			return Math.floor(Math.random() * compliments.length);
 		};
 
@@ -110,20 +88,20 @@ Module.register("compliments", {
 	 *
 	 * return compliments Array<String> - Array with compliments for the time of the day.
 	 */
-	complimentArray: function() {
+	complimentArray: function () {
 		var hour = moment().hour();
 		var compliments = null;
 		var date = this.config.mockDate ? this.config.mockDate : moment().format("YYYY-MM-DD");
 
 		if (hour >= this.config.morningStartTime && hour < this.config.morningEndTime && this.config.compliments.hasOwnProperty("morning")) {
 			compliments = this.config.compliments.morning.slice(0);
-        }else if (hour >= this.config.afternoonStartTime && hour < this.config.afternoonEndTime && this.config.compliments.hasOwnProperty("afternoon")) {
+		} else if (hour >= this.config.afternoonStartTime && hour < this.config.afternoonEndTime && this.config.compliments.hasOwnProperty("afternoon")) {
 			compliments = this.config.compliments.afternoon.slice(0);
-        } else if (hour >= this.config.eveningStartTime && hour < this.config.eveningEndTime && this.config.compliments.hasOwnProperty("evening")) {
+		} else if (hour >= this.config.eveningStartTime && hour < this.config.eveningEndTime && this.config.compliments.hasOwnProperty("evening")) {
 			compliments = this.config.compliments.evening.slice(0);
-        } else if ( this.config.compliments.hasOwnProperty("night")) {
-            compliments = this.config.compliments.night.slice(0);
-        }
+		} else if (this.config.compliments.hasOwnProperty("night")) {
+			compliments = this.config.compliments.night.slice(0);
+		}
 
 		if (typeof compliments === "undefined") {
 			compliments = new Array();
@@ -135,7 +113,7 @@ Module.register("compliments", {
 
 		compliments.push.apply(compliments, this.config.compliments.anytime);
 
-		for (entry in this.config.compliments) {
+		for (var entry in this.config.compliments) {
 			if (new RegExp(entry).test(date)) {
 				compliments.push.apply(compliments, this.config.compliments[entry]);
 			}
@@ -147,13 +125,13 @@ Module.register("compliments", {
 	/* complimentFile(callback)
 	 * Retrieve a file from the local filesystem
 	 */
-	complimentFile: function(callback) {
+	complimentFile: function (callback) {
 		var xobj = new XMLHttpRequest(),
 			isRemote = this.config.remoteFile.indexOf("http://") === 0 || this.config.remoteFile.indexOf("https://") === 0,
 			path = isRemote ? this.config.remoteFile : this.file(this.config.remoteFile);
 		xobj.overrideMimeType("application/json");
 		xobj.open("GET", path, true);
-		xobj.onreadystatechange = function() {
+		xobj.onreadystatechange = function () {
 			if (xobj.readyState === 4 && xobj.status === 200) {
 				callback(xobj.responseText);
 			}
@@ -166,27 +144,26 @@ Module.register("compliments", {
 	 *
 	 * return compliment string - A compliment.
 	 */
-	randomCompliment: function() {
+	randomCompliment: function () {
 		// get the current time of day compliments list
 		var compliments = this.complimentArray();
 		// variable for index to next message to display
 		let index = 0;
 		// are we randomizing
-		if(this.config.random){
+		if (this.config.random) {
 			// yes
 			index = this.randomIndex(compliments);
-		}
-		else{
+		} else {
 			// no, sequential
 			// if doing sequential, don't fall off the end
-			index = (this.lastIndexUsed >= (compliments.length-1))?0: ++this.lastIndexUsed;
+			index = this.lastIndexUsed >= compliments.length - 1 ? 0 : ++this.lastIndexUsed;
 		}
 
 		return compliments[index] || "";
 	},
 
 	// Override dom generator.
-	getDom: function() {
+	getDom: function () {
 		var wrapper = document.createElement("div");
 		wrapper.className = this.config.classes ? this.config.classes : "thin xlarge bright pre-line";
 		// get the compliment text
@@ -196,7 +173,7 @@ Module.register("compliments", {
 		// create a span to hold it all
 		var compliment = document.createElement("span");
 		// process all the parts of the compliment text
-		for (part of parts){
+		for (var part of parts) {
 			// create a text element for each part
 			compliment.appendChild(document.createTextNode(part));
 			// add a break `
@@ -210,7 +187,7 @@ Module.register("compliments", {
 	},
 
 	// From data currentweather set weather type
-	setCurrentWeatherType: function(data) {
+	setCurrentWeatherType: function (data) {
 		var weatherIconTable = {
 			"01d": "day_sunny",
 			"02d": "day_cloudy",
@@ -235,10 +212,9 @@ Module.register("compliments", {
 	},
 
 	// Override notification handler.
-	notificationReceived: function(notification, payload, sender) {
+	notificationReceived: function (notification, payload, sender) {
 		if (notification === "CURRENTWEATHER_DATA") {
 			this.setCurrentWeatherType(payload.data);
 		}
-	},
-
+	}
 });
